@@ -19,13 +19,13 @@ limitations under the License.
 package test
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	knativetest "knative.dev/pkg/test"
 )
 
 // TestTaskRunPipelineRunCancel is an integration test that will
@@ -37,20 +37,24 @@ func TestTaskRunPipelineRunCancel(t *testing.T) {
 		retries bool
 	}
 
-	tds := []tests{
-		{
-			name:    "With retries",
-			retries: true,
-		}, {
-			name:    "No retries",
-			retries: false,
-		},
+	var tds []tests
+	for i := 0; i < 30; i++ {
+		tds = append(tds, []tests{
+			{
+				name:    fmt.Sprintf("%d With retries", i),
+				retries: true,
+			}, tests{
+				name:    fmt.Sprintf("%d No retries", i),
+				retries: false,
+			},
+		}...)
 	}
 
 	t.Parallel()
 
-	for _, tdd := range tds {
-		t.Run(tdd.name, func(t *testing.T) {
+	for i, tdd := range tds {
+		testName := fmt.Sprintf("%d - %s", i, tdd.name)
+		t.Run(testName, func(t *testing.T) {
 			tdd := tdd
 			pipelineTask := v1beta1.PipelineTask{
 				Name:    "foo",
@@ -63,8 +67,8 @@ func TestTaskRunPipelineRunCancel(t *testing.T) {
 			c, namespace := setup(t)
 			t.Parallel()
 
-			knativetest.CleanupOnInterrupt(func() { tearDown(t, c, namespace) }, t.Logf)
-			defer tearDown(t, c, namespace)
+			// knativetest.CleanupOnInterrupt(func() { tearDown(t, c, namespace) }, t.Logf)
+			// defer tearDown(t, c, namespace)
 
 			t.Logf("Creating Task in namespace %s", namespace)
 			task := &v1beta1.Task{
