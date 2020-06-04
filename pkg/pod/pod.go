@@ -19,6 +19,7 @@ package pod
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
@@ -134,8 +135,11 @@ func MakePod(images pipeline.Images, taskRun *v1alpha1.TaskRun, taskSpec v1alpha
 	// its own volume mount at that path.
 	for i, s := range stepContainers {
 		requestedVolumeMounts := map[string]bool{}
-		for _, vm := range s.VolumeMounts {
+		for i, vm := range s.VolumeMounts {
 			requestedVolumeMounts[filepath.Clean(vm.MountPath)] = true
+			if vm.MountPath == "/share/output" {
+				s.VolumeMounts[i].SubPath = taskRun.Labels["tekton.dev/pipelineRun"]
+			}
 		}
 		var toAdd []corev1.VolumeMount
 		for _, imp := range implicitVolumeMounts {
@@ -198,6 +202,12 @@ func MakePod(images pipeline.Images, taskRun *v1alpha1.TaskRun, taskSpec v1alpha
 	podAnnotations := taskRun.Annotations
 	podAnnotations[ReleaseAnnotation] = ReleaseAnnotationValue
 
+	if podAnnotations["orchestration.caicloud.io/nodeSelector"] != "" {
+		s := strings.Split(podAnnotations["orchestration.caicloud.io/nodeSelector"], "=")
+		if len(s) == 2 {
+			podTemplate.NodeSelector[s[0]] = s[1]
+		}
+	}
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			// We execute the build's pod in the same namespace as where the build was
