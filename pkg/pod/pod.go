@@ -205,6 +205,9 @@ func MakePod(images pipeline.Images, taskRun *v1alpha1.TaskRun, taskSpec v1alpha
 	if podAnnotations["orchestration.caicloud.io/nodeSelector"] != "" {
 		s := strings.Split(podAnnotations["orchestration.caicloud.io/nodeSelector"], "=")
 		if len(s) == 2 {
+			if podTemplate.NodeSelector == nil {
+				podTemplate.NodeSelector = make(map[string]string)
+			}
 			podTemplate.NodeSelector[s[0]] = s[1]
 		}
 	}
