@@ -1,4 +1,5 @@
+defaultBaseImage: test.cargo.io/library/alpine:3.6
 baseImageOverrides:
-  github.com/tektoncd/pipeline/cmd/creds-init: gcr.io/tekton-nightly/github.com/tektoncd/pipeline/build-base:latest
-  github.com/tektoncd/pipeline/cmd/git-init: gcr.io/tekton-nightly/github.com/tektoncd/pipeline/build-base:latest
+  github.com/tektoncd/pipeline/cmd/creds-init: test.cargo.io/release/tekton-base:v0.1
+  github.com/tektoncd/pipeline/cmd/git-init: test.cargo.io/release/tekton-base:v0.1
   github.com/tektoncd/pipeline/cmd/entrypoint: busybox  # image must have `cp` in $PATH
