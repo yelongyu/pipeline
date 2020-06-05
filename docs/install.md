@@ -235,6 +235,10 @@ data:
   bucket.service.account.field.name: GOOGLE_APPLICATION_CREDENTIALS
 ```
 
+## Configuring self-signed cert for private registry
+
+If you are using a self-signed cert for private registry, configure your registry cert in the `config-registry-cert` `ConfigMap` with the key `cert`. 
+
 ## Customizing basic execution parameters
 
 You can specify your own values that replace the default service account (`ServiceAccount`), timeout (`Timeout`), and Pod template (`PodTemplate`) values used by Tekton Pipelines in `TaskRun` and `PipelineRun` definitions. To do so, modify the ConfigMap `config-defaults` with your desired values.
